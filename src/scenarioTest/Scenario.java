@@ -1,18 +1,76 @@
 package scenarioTest;
 
 import personnages.Gaulois;
-import produits.Poisson;
-import produits.Sanglier;
+import produit.Poisson;
+import produit.Produit;
+import produit.Sanglier;
 import villagegaulois.Etal;
-
+import villagegaulois.IEtal;
+import villagegaulois.IVillage;
 public class Scenario {
 
 	public static void main(String[] args) {
+		
+		IVillage village = new IVillage() {
 
-		// TODO Partie 4 : creer de la classe anonyme Village
+		    private IEtal[] marche = new IEtal[3];
 
-		// fin
+		    @Override
+		    public <P extends Produit> boolean installerVendeur(Etal<P> etal,Gaulois vendeur, P[] produits, int prix) {
 
+		        for (int i = 0; i < marche.length; i++) {
+		            if (marche[i] == null) {
+		                etal.installerVendeur(vendeur, produits, prix);
+		                marche[i] = etal;
+		                return true;
+		            }
+		        }
+		        return false;
+		    }
+
+		    @Override
+		    public void acheterProduit(String produit, int quantiteSouhaitee) {
+		        int totalAchete = 0;
+
+		        for (int i = 0; i < marche.length; i++) {
+		            if (marche[i] != null) {
+
+		                int dispo = marche[i].contientProduit(produit, quantiteSouhaitee - totalAchete);
+
+		                if (dispo > 0) {
+		                    int prix = marche[i].acheterProduit(dispo);
+
+		                    System.out.println("A l'étal n° " + (i + 1)
+		                            + ", j'achète " + dispo + " " + produit
+		                            + " et je paye " + prix + " sous.");
+
+		                    totalAchete += dispo;
+		                }
+
+		                if (totalAchete == quantiteSouhaitee) {
+		                    break;
+		                }
+		            }
+		        }
+
+		        System.out.println("Je voulais " + quantiteSouhaitee + " " + produit
+		                + ", j'en ai acheté " + totalAchete + ".");
+		    }
+
+		    @Override
+		    public String toString() {
+		        StringBuilder sb = new StringBuilder();
+
+		        for (IEtal etal : marche) {
+		            if (etal != null) {
+		                sb.append(etal.etatEtal());
+		            }
+		        }
+
+		        return sb.toString();
+		    }
+		};
+		
 		Gaulois ordralfabetix = new Gaulois("Ordralfabétix", 9);
 		Gaulois obelix = new Gaulois("Obélix", 20);
 		Gaulois asterix = new Gaulois("Astérix", 6);
